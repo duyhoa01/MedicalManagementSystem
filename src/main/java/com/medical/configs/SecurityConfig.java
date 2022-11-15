@@ -1,5 +1,6 @@
 package com.medical.configs;
 
+import com.medical.filter.CustomAuthenticationFilter;
 import com.medical.filter.CustomAuthorizationFilter;
 import com.medical.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +34,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        CustomAuthenticationFilter customAuthenticationFilter=new CustomAuthenticationFilter(authenticationManager());
+//        customAuthenticationFilter.setFilterProcessesUrl("/api/auth/login");
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(STATELESS);
-        http.authorizeRequests().antMatchers("/auth/login/**","/token/refresh/**","/api/user/save/**","/api/doctor/register","/api/doctor/files/**").permitAll();
-//        http.authorizeRequests().antMatchers("/api/users","/api/user/**").hasAuthority("ROLE_ADMIN");
-//        http.authorizeRequests().anyRequest().authenticated();
+        http.authorizeRequests().antMatchers("/api/auth/login/**","/api/token/refresh/**","/api/register").permitAll();
+        http.addFilter(customAuthenticationFilter);
         http.addFilterBefore(customAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
     }
 

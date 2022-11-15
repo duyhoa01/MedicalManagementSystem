@@ -1,30 +1,28 @@
 package com.medical.api.doctor;
 
-import com.medical.dtos.DoctorModel;
-import com.medical.dtos.modelAssembler.DoctorModelAssembler;
-import com.medical.model.Doctor;
-import com.medical.model.User;
+import com.medical.dtos.DoctorPostDTO;
+import com.medical.dtos.DoctorResponseDTO;
+import com.medical.dtos.MessageResponse;
+import com.medical.dtos.PatientPostDTO;
 import com.medical.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.repository.support.Repositories;
-import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.SendFailedException;
 import javax.print.Doc;
 import javax.validation.Valid;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/doctors")
@@ -36,28 +34,24 @@ public class DoctorApi {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @PreAuthorize("hasRole('ADMIN') and hasPermission('DOCTOR', 'ADD')")
-    @RequestMapping(value = "", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE},method = RequestMethod.POST)
-    public ResponseEntity<?> register(@RequestPart DoctorModel doctorModel,@RequestPart MultipartFile file){
+    private Boolean ok=true;
 
-        DoctorModelAssembler doctorModelAssembler=new DoctorModelAssembler();
+//    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("")
+    public ResponseEntity<?> addDoctor(@RequestPart @Valid DoctorPostDTO doctorPostDTO, @RequestPart(required = false) MultipartFile image) throws SendFailedException {
 
+        System.out.println("add doctor");
         //hash password
-        doctorModel.getUser().setPassword(passwordEncoder.encode(doctorModel.getUser().getPassword()));
-        //doctorModel.setImage(file);
-        doctorModel.getUser().setStatus(false);
-        //convert DoctorModel to Doctor
-        Doctor doctor=doctorModelAssembler.convertToDoctor(doctorModel);
-        System.out.println(doctor);
+        doctorPostDTO.getUser().setPassword(passwordEncoder.encode(doctorPostDTO.getUser().getPassword()));
 
         //call doctorService
-        Doctor newDoctor=doctorService.registerDoctor(doctor,file);
+        DoctorResponseDTO newDoctor=doctorService.addDoctor(doctorPostDTO,image);
 
         //check success add doctor
         if(newDoctor!=null){
-            return new ResponseEntity<>(doctorModelAssembler.toModel(newDoctor), HttpStatus.OK);
+            return new ResponseEntity<>(newDoctor, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>("create fail",HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new MessageResponse("username đã tồn tại hoặc mã chuyên khoa không đúng"),HttpStatus.CONFLICT);
         }
 
     }
@@ -71,49 +65,51 @@ public class DoctorApi {
     }
 
     @GetMapping("")
-    public ResponseEntity<PagedModel<Doctor>> getAllDoctor(@RequestParam(required = false, defaultValue = "0") Integer page,
-                                                   @RequestParam(required = false, defaultValue = "10") Integer size,
-                                                   @RequestParam(required = false, defaultValue ="") String key,
-                                                   @RequestParam(required = false, defaultValue = "rate") String sort,
-                                                   PagedResourcesAssembler assembler){
-        DoctorModelAssembler doctorModelAssembler=new DoctorModelAssembler();
-        Page<Doctor> doctors= doctorService.getListDoctor(page,size,key,sort);
-        return new ResponseEntity<PagedModel<Doctor>>(assembler.toModel(doctors,doctorModelAssembler),HttpStatus.OK);
+    public ResponseEntity<PagedModel<DoctorResponseDTO>> getAllDoctor(Pageable pageable,
+                                                                      @RequestParam(required = false, defaultValue ="") String key){
+
+        return new ResponseEntity<PagedModel<DoctorResponseDTO>>(doctorService.getListDoctor(pageable,key),HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') and hasPermission('DOCTOR', 'DELETE')")
-    public ResponseEntity<String> delete(@PathVariable Long id) {
-        boolean ok = doctorService.deleteDoctor(id);
-        if(ok){
-            return new ResponseEntity<String>("delete success",HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<String>("delete not success",HttpStatus.RESET_CONTENT);
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        try{
+            doctorService.deleteDoctor(id);
+            return new ResponseEntity<>(new MessageResponse("xóa thành công"),HttpStatus.OK);
+        } catch (NoSuchElementException e){
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.NOT_FOUND);
+        } catch (AccessDeniedException e){
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.FORBIDDEN);
+        }catch (Exception e){
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.BAD_GATEWAY);
         }
+
     }
 
     @GetMapping("{id}")
     public ResponseEntity<?> getDoctor(@PathVariable Long id){
-        Doctor doctor = doctorService.getDoctorById(id);
-        if(doctor==null){
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            DoctorModelAssembler doctorModelAssembler=new DoctorModelAssembler();
-            DoctorModel doctorModel= doctorModelAssembler.toModel(doctor);
-            return new ResponseEntity<DoctorModel>(doctorModel,HttpStatus.OK);
+        try{
+            DoctorResponseDTO doctorModel = doctorService.getDoctorById(id);
+            return new ResponseEntity<>(doctorModel,HttpStatus.OK);
+        } catch (NoSuchElementException e){
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.NOT_FOUND);
         }
     }
 
     @PutMapping("{id}")
-    @PreAuthorize("hasRole('ADMIN') and hasPermission('DOCTOR', 'UPDATE')")
-    public ResponseEntity<?> updateDoctor(@RequestPart Doctor doctor,@PathVariable Long id){
-        Doctor upDoctor=doctorService.updateDoctor(doctor,id);
-        if(upDoctor == null){
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            DoctorModelAssembler doctorModelAssembler=new DoctorModelAssembler();
-            DoctorModel doctorModel= doctorModelAssembler.toModel(doctor);
-            return new ResponseEntity<DoctorModel>(doctorModel,HttpStatus.OK);
+//    @PreAuthorize("hasRole('ADMIN') or #username == authentication.name")
+    public ResponseEntity<?> updateDoctor(@RequestPart @Valid DoctorPostDTO doctorPostDTO,
+                                          @RequestPart(required = false) MultipartFile image,
+                                          @PathVariable Long id){
+        try{
+            DoctorResponseDTO upDoctor=doctorService.updateDoctor(doctorPostDTO,image,id);
+            return new ResponseEntity<>(upDoctor,HttpStatus.OK);
+        }catch (AccessDeniedException e){
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.FORBIDDEN);
+        } catch (NoSuchElementException e){
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.NOT_FOUND);
+        } catch (Exception e){
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.BAD_REQUEST);
         }
     }
 }

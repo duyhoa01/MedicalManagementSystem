@@ -1,9 +1,14 @@
 package com.medical.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
+@Getter
+@Setter
 public class Appointment {
 
     @Id
@@ -11,12 +16,14 @@ public class Appointment {
     private Long id;
 
     @ManyToOne
-    private Patient patient;
-
-    @ManyToOne
     private Doctor doctor;
 
-    private Date date;
+    @ManyToOne
+    private Patient patient;
+
+    private LocalDateTime date;
+
+    private Double cost;
 
     private String symptoms;
 

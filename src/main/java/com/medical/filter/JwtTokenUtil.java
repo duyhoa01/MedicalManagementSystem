@@ -25,7 +25,7 @@ public class JwtTokenUtil {
     public String generateAccessToken(User user, HttpServletRequest request) {
         Algorithm algorithm= Algorithm.HMAC256(SECRET_KEY.getBytes());
         return JWT.create()
-                .withSubject(user.getUsername())
+                .withSubject(user.getEmail())
                 .withExpiresAt(new Date(System.currentTimeMillis()+ACCESS_EXPIRE_DURATION))
                 .withIssuer(request.getRequestURL().toString())
                 .withClaim("roles",user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
@@ -35,7 +35,7 @@ public class JwtTokenUtil {
     public String generateRefreshToken(User user, HttpServletRequest request) {
         Algorithm algorithm= Algorithm.HMAC256(SECRET_KEY.getBytes());
         return JWT.create()
-                .withSubject(user.getUsername())
+                .withSubject(user.getEmail())
                 .withExpiresAt(new Date(System.currentTimeMillis()+REFRESH_EXPIRE_DURATION))
                 .withIssuer(request.getRequestURL().toString())
                 .sign(algorithm);

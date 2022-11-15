@@ -1,9 +1,16 @@
 package com.medical.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Entity
+@Getter
+@Setter
 public class Schedule {
 
     @Id
@@ -14,13 +21,16 @@ public class Schedule {
 
     private int maxNumber;
 
-    private long timeSlot;
+    private LocalDateTime endDate;
 
-    private Date date;
+    private LocalDateTime beginDate;
 
     private Double cost;
 
     @ManyToOne
     private Doctor doctor;
+
+    @OneToMany(mappedBy = "schedule")
+    private List<Appointment> appointments;
 
 }

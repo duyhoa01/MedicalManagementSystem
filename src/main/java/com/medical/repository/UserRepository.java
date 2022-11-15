@@ -7,11 +7,16 @@ import org.springframework.data.jpa.repository.Query;
 public interface UserRepository extends JpaRepository<User,Long> {
     User findByUsername(String username);
 
+    User findByEmail(String username);
+
+    @Query("FROM User u WHERE u.token= ?1 AND u.status=false")
+    User findByToken(String token);
+
     @Query("" +
             "SELECT CASE WHEN COUNT(s) > 0 THEN " +
             "TRUE ELSE FALSE END " +
             "FROM User s " +
-            "WHERE s.username = ?1"
+            "WHERE s.email = ?1"
     )
     Boolean selectExistsUserName(String username);
 }

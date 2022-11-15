@@ -43,35 +43,35 @@ public class DoctorServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void canRegisterDoctor(){
-
-        //given
-        PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
-
-        MockMultipartFile firstFile = new MockMultipartFile("data", "filename.txt", "text/plain", "some xml".getBytes());
-
-        Doctor doctor=new Doctor();
-        User user=new User();
-        user.setUsername("admintext");
-        user.setPassword(passwordEncoder.encode("12345678"));
-        doctor.setUser(user);
-        doctor.setImage(doctor.getUser().getUsername());
-        doctor.setExperience(4.5f);
-
-        given(fileService.StoreFile(any(),anyString()))
-                .willReturn(doctor.getUser().getUsername());
-
-        //when
-        underTest.registerDoctor(doctor,firstFile);
-
-        //then
-        ArgumentCaptor<Doctor> studentArgumentCaptor=
-                ArgumentCaptor.forClass(Doctor.class);
-        verify(doctorRepository)
-                .save(studentArgumentCaptor.capture());
-        Doctor capturedStudent= studentArgumentCaptor.getValue();
-        assertThat(capturedStudent).isEqualTo(doctor);
-    }
+//    @Test
+//    void canRegisterDoctor(){
+//
+//        //given
+//        PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
+//
+//        MockMultipartFile firstFile = new MockMultipartFile("data", "filename.txt", "text/plain", "some xml".getBytes());
+//
+//        Doctor doctor=new Doctor();
+//        User user=new User();
+//        user.setUsername("admintext");
+//        user.setPassword(passwordEncoder.encode("12345678"));
+//        doctor.setUser(user);
+//        doctor.setImage(doctor.getUser().getUsername());
+//        doctor.setExperience(4.5f);
+//
+//        given(fileService.StoreFile(any(),anyString()))
+//                .willReturn(doctor.getUser().getUsername());
+//
+//        //when
+//        underTest.registerDoctor(doctor,firstFile);
+//
+//        //then
+//        ArgumentCaptor<Doctor> studentArgumentCaptor=
+//                ArgumentCaptor.forClass(Doctor.class);
+//        verify(doctorRepository)
+//                .save(studentArgumentCaptor.capture());
+//        Doctor capturedStudent= studentArgumentCaptor.getValue();
+//        assertThat(capturedStudent).isEqualTo(doctor);
+//    }
 
 }

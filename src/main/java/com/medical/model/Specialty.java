@@ -9,24 +9,16 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-public class Doctor {
+public class Specialty {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(targetEntity = User.class)
-    private User user;
-
-    private float experience;
-
-    private float rate;
+    private String name;
 
     private String description;
 
-    @OneToMany(mappedBy = "doctor")
-    private List<Appointment> appointments;
-
-    @ManyToOne
-    private Specialty specialty;
+    @OneToMany(mappedBy = "specialty",fetch = FetchType.EAGER)
+    private List<Doctor> doctors;
 }
