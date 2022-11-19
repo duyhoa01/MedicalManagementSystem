@@ -24,7 +24,6 @@ public class UserRepositoryTest {
         //givenf
         String userName="user1";
         User user=new User();
-        user.setUsername(userName);
         underTest.save(user);
         //when
         Boolean expected=underTest.selectExistsUserName(userName);

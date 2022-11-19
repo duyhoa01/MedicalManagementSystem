@@ -11,6 +11,11 @@ import org.springframework.data.repository.query.Param;
 public interface DoctorRepository extends JpaRepository<Doctor,Long> {
     Page<Doctor> findByUser_LastNameContaining(String name, Pageable pageable);
 
-    @Query("select d from Doctor d JOIN d.user  u  where u.lastName LIKE CONCAT('%',:name,'%') or u.firstName LIKE CONCAT('%',:name,'%')")
+    Page<Doctor> findBySpecialty_Id(Long id, Pageable pageable);
+
+    @Query("select d from Doctor d JOIN d.user  u  where CONCAT(u.firstName,' ',u.lastName) LIKE CONCAT('%',:name,'%')")
     Page<Doctor> findDoctorByName(@Param("name") String name, Pageable pageable);
+
+    @Query("select d from Doctor d JOIN d.user  u  where CONCAT(u.firstName,' ',u.lastName) LIKE CONCAT('%',:name,'%') AND d.specialty.id = :specialty")
+    Page<Doctor> findDoctorByNameAndSpecialty(@Param("name") String name, Pageable pageable, @Param("specialty") Long specialty);
 }

@@ -16,8 +16,6 @@ public class UserResponeDTO extends RepresentationModel<UserResponeDTO> {
 
     private Long id;
 
-    private String username;
-
     private String firstName;
 
     private String lastName;

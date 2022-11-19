@@ -43,7 +43,7 @@ public class PatientService {
     @Autowired
     private FileService fileService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public PatientResponeDTO addPatient(PatientPostDTO patientPostDTO, MultipartFile image) throws SendFailedException {
         Patient patient = patientMapper.PatientPostDTOToPatient(patientPostDTO);
         String url ;

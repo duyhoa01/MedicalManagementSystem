@@ -1,11 +1,8 @@
 package com.medical;
 
 import com.cloudinary.Cloudinary;
-import com.medical.filter.JwtTokenUtil;
 import com.medical.mapper.DoctorMapper;
 import com.medical.mapper.PatientMapper;
-import com.medical.mapper.ScheduleMapper;
-import com.medical.model.Patient;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.boot.SpringApplication;
@@ -15,7 +12,6 @@ import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +28,8 @@ public class MedicalManagementSystemApplication {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins("*");
+                registry.addMapping("/**").allowedOrigins("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE");
             }
         };
     }
@@ -73,6 +70,4 @@ public class MedicalManagementSystemApplication {
     @Bean
     public DoctorMapper doctorMapper(){return new DoctorMapper();}
 
-    @Bean
-    public ScheduleMapper scheduleMapper(){return new ScheduleMapper();}
 }

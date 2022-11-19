@@ -66,9 +66,10 @@ public class DoctorApi {
 
     @GetMapping("")
     public ResponseEntity<PagedModel<DoctorResponseDTO>> getAllDoctor(Pageable pageable,
-                                                                      @RequestParam(required = false, defaultValue ="") String key){
+                                                                      @RequestParam(required = false, defaultValue ="") String key,
+                                                                      @RequestParam(required = false, defaultValue = "0") Long specialty){
 
-        return new ResponseEntity<PagedModel<DoctorResponseDTO>>(doctorService.getListDoctor(pageable,key),HttpStatus.OK);
+        return new ResponseEntity<PagedModel<DoctorResponseDTO>>(doctorService.getListDoctor(pageable,key,specialty),HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

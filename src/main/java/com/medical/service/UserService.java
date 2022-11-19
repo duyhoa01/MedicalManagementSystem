@@ -50,7 +50,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User getUserByUserName(String username){
-        return userRepository.findByUsername(username);
+        return userRepository.findByEmail(username);
     }
 
     public boolean selectExistsUserName(String username){
@@ -84,7 +84,7 @@ public class UserService implements UserDetailsService {
             upUser.setLastName(user.getLastName());
             upUser.setFirstName(user.getFirstName());
             upUser.setAge(user.getAge());
-            upUser.setEmail(user.getEmail());
+//            upUser.setEmail(user.getEmail());
 
             if(image != null){
                 String url = fileService.uploadFile(image);
@@ -119,7 +119,7 @@ public class UserService implements UserDetailsService {
 
     public boolean changeassword(String password, String username, String oldPassword){
         try{
-            User user = userRepository.findByUsername(username);
+            User user = userRepository.findByEmail(username);
 
             if(passwordEncoder.matches(oldPassword,user.getPassword())){
                 user.setPassword(password);
@@ -135,7 +135,7 @@ public class UserService implements UserDetailsService {
 
     public boolean blockUser(String username){
         try{
-            User user = userRepository.findByUsername(username);
+            User user = userRepository.findByEmail(username);
             user.setStatus(false);
             userRepository.save(user);
 
@@ -148,7 +148,7 @@ public class UserService implements UserDetailsService {
 
     public boolean enableUser(String username){
         try{
-            User user = userRepository.findByUsername(username);
+            User user = userRepository.findByEmail(username);
             user.setStatus(true);
             userRepository.save(user);
 

@@ -25,4 +25,5 @@ public class DoctorResponseDTO extends RepresentationModel<DoctorResponseDTO> {
 
     private String specialty;
 
+    private Long specialty_id;
 }

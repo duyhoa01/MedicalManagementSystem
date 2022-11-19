@@ -41,6 +41,8 @@ public class DoctorService {
     @Autowired
     private RoleService roleService;
 
+    @Autowired
+    private SpecialtyRepository specialtyRepository;
 
     @Autowired
     private DoctorMapper mapper;
@@ -48,6 +50,7 @@ public class DoctorService {
     @Autowired
     private PagedResourcesAssembler<Doctor> assembler;
 
+    @PreAuthorize("hasRole('ADMIN')")
     public DoctorResponseDTO addDoctor(DoctorPostDTO doctorPostDTO, MultipartFile image) throws SendFailedException {
 
         Doctor doctor = null;
@@ -82,12 +85,22 @@ public class DoctorService {
         return fileService.load(filename);
     }
 
-    public PagedModel<DoctorResponseDTO> getListDoctor(Pageable pageable, String key){
+    public PagedModel<DoctorResponseDTO> getListDoctor(Pageable pageable, String key, Long specialty){
         try{
             if(key.equals("")){
-                return assembler.toModel(doctorRepository.findAll(pageable),mapper);
+                if(specialty == 0){
+                    return assembler.toModel(doctorRepository.findAll(pageable),mapper);
+                } else {
+                    return assembler.toModel(doctorRepository.findBySpecialty_Id(specialty,pageable),mapper);
+                }
+
             } else {
-                return assembler.toModel(doctorRepository.findDoctorByName(key,pageable),mapper);
+                if(specialty == 0){
+                    return assembler.toModel(doctorRepository.findDoctorByName(key,pageable),mapper);
+                } else {
+                    return assembler.toModel(doctorRepository.findDoctorByNameAndSpecialty(key,pageable,specialty), mapper);
+                }
+
             }
         } catch (Exception e){
 
@@ -134,6 +147,7 @@ public class DoctorService {
         }
 
         userService.updateUser(doctor.getUser(),upDoctor.get().getUser().getId(),image);
+        upDoctor.get().setSpecialty(specialtyRepository.findById(doctorPostDTO.getSpecialty()).get());
         upDoctor.get().setExperience(doctor.getExperience());
         upDoctor.get().setDescription(doctor.getDescription());
 

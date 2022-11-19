@@ -32,8 +32,8 @@ public class PatientApi {
 
     @PostMapping("")
     public ResponseEntity<?> addPatient(@RequestPart @Valid PatientPostDTO patientPostDTO, @RequestPart(required = false) MultipartFile image){
-        if(patientPostDTO.getUser().getUsername()==null || patientPostDTO.getUser().getPassword() == null){
-            return new ResponseEntity<>(new MessageResponse("nhập đầy đủ thông tin"),HttpStatus.BAD_REQUEST);
+        if(patientPostDTO.getUser().getPassword() == null){
+            return new ResponseEntity<>(new MessageResponse("thiếu password"),HttpStatus.BAD_REQUEST);
         }
         patientPostDTO.getUser().setStatus(true);
         patientPostDTO.getUser().setPassword(passwordEncoder.encode(patientPostDTO.getUser().getPassword()));

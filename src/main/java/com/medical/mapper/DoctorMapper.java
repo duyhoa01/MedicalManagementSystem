@@ -28,6 +28,7 @@ public class DoctorMapper implements RepresentationModelAssembler<Doctor, Doctor
         DoctorResponseDTO doctorDto=modelMapper.map(entity, DoctorResponseDTO.class);
         doctorDto.setUser(modelMapper.map(entity.getUser(), UserResponeDTO.class));
         doctorDto.setSpecialty(entity.getSpecialty().getName());
+        doctorDto.setSpecialty_id(entity.getSpecialty().getId());
 
         doctorDto.add(linkTo(methodOn(DoctorApi.class).getDoctor(doctorDto.getId())).withSelfRel());
 
