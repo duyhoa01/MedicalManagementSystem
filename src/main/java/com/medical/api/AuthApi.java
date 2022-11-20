@@ -117,8 +117,8 @@ public class AuthApi {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerPatient(@RequestPart @Valid PatientPostDTO patientPostDTO, @RequestPart(required = false) MultipartFile image){
-        if(patientPostDTO.getUser().getUsername()==null || patientPostDTO.getUser().getPassword() == null){
-            return new ResponseEntity<>(new MessageResponse("nhập đầy đủ thông tin"),HttpStatus.BAD_REQUEST);
+        if( patientPostDTO.getUser().getPassword() == null){
+            return new ResponseEntity<>(new MessageResponse("nhập thiếu password"),HttpStatus.BAD_REQUEST);
         }
         patientPostDTO.getUser().setStatus(false);
         patientPostDTO.getUser().setPassword(passwordEncoder.encode(patientPostDTO.getUser().getPassword()));

@@ -14,13 +14,17 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @Setter
-public class AppoinmentResponseDTO extends RepresentationModel<AppoinmentResponseDTO> {
+public class AppointmentResponseDTO extends RepresentationModel<AppointmentResponseDTO> {
 
     private Long id;
 
     private String patient;
 
+    private Long patient_id;
+
     private String doctor;
+
+    private Long doctor_id;
 
     private Double cost;
 
@@ -29,4 +33,5 @@ public class AppoinmentResponseDTO extends RepresentationModel<AppoinmentRespons
     private String symptoms;
 
     private Boolean status;
+
 }
