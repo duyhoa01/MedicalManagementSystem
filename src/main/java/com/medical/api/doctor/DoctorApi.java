@@ -4,6 +4,7 @@ import com.medical.dtos.DoctorPostDTO;
 import com.medical.dtos.DoctorResponseDTO;
 import com.medical.dtos.MessageResponse;
 import com.medical.dtos.PatientPostDTO;
+import com.medical.service.AppointmentService;
 import com.medical.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -35,6 +36,9 @@ public class DoctorApi {
     private PasswordEncoder passwordEncoder;
 
     private Boolean ok=true;
+
+    @Autowired
+    private AppointmentService appointmentService;
 
 //    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
@@ -111,6 +115,25 @@ public class DoctorApi {
             return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.NOT_FOUND);
         } catch (Exception e){
             return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    @GetMapping("/{id}/appointments/pending")
+    public ResponseEntity<?> getListAppointmentPendingOfDoctor(Pageable pageable,@PathVariable Long id){
+        try{
+            return new ResponseEntity<>(appointmentService.getListAppointmentPendingOfDoctor(pageable,id),HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/{id}/appointments")
+    public ResponseEntity<?> getListAppointmentOfDoctor(Pageable pageable,@PathVariable Long id){
+        try{
+            return new ResponseEntity<>(appointmentService.getListAppointmentOfDoctor(pageable,id),HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 }

@@ -4,6 +4,7 @@ import com.medical.dtos.DoctorResponseDTO;
 import com.medical.dtos.MessageResponse;
 import com.medical.dtos.PatientResponeDTO;
 import com.medical.dtos.PatientPostDTO;
+import com.medical.service.AppointmentService;
 import com.medical.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,9 @@ public class PatientApi {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AppointmentService appointmentService;
 
     @PostMapping("")
     public ResponseEntity<?> addPatient(@RequestPart @Valid PatientPostDTO patientPostDTO, @RequestPart(required = false) MultipartFile image){
@@ -102,6 +106,15 @@ public class PatientApi {
             return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.FORBIDDEN);
         }catch (Exception e){
             return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.BAD_GATEWAY);
+        }
+    }
+
+    @GetMapping("/{id}/appointments")
+    public ResponseEntity<?> getListAppointmentOfPatient(Pageable pageable,@PathVariable Long id){
+        try{
+            return new ResponseEntity<>(appointmentService.getListAppointmentOfPatient(pageable,id),HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 

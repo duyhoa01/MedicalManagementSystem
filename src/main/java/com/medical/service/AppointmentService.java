@@ -9,6 +9,9 @@ import com.medical.model.Patient;
 import com.medical.model.User;
 import com.medical.repository.AppointmentReopsitory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -31,6 +34,9 @@ public class AppointmentService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private PagedResourcesAssembler<Appointment> assembler;
+
     @PreAuthorize("hasRole('ADMIN') or hasRole('PATIENT')")
     public AppointmentResponseDTO addAppointment(AppointmentPostDTO appointmentPostDTO){
 
@@ -48,7 +54,8 @@ public class AppointmentService {
             appointment.setStatus(true);
         }
 
-        appointment.setDate(LocalDateTime.now());
+//        System.out.println(LocalDateTime.now());
+//        appointment.setDate(LocalDateTime.now());
 
         return mapper.toModel(appointmentReopsitory.save(appointment));
 
@@ -66,7 +73,7 @@ public class AppointmentService {
             String currentPrincipalName = authentication.getName();
             System.out.println("name"+currentPrincipalName);
             Doctor doctor1= ((User)userService.loadUserByUsername(currentPrincipalName)).getDoctor();
-            if(doctor1.getId() != id){
+            if(doctor1.getId() != appointment.get().getDoctor().getId()){
                 throw new AccessDeniedException("Access is denied");
             }
         }
@@ -75,5 +82,61 @@ public class AppointmentService {
 
         return mapper.toModel(appointmentReopsitory.save(appointment.get()));
 
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public PagedModel<AppointmentResponseDTO> getListAppointmentPending(Pageable pageable){
+            return assembler.toModel(appointmentReopsitory.findAllPending(pageable), mapper);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public PagedModel<AppointmentResponseDTO> getListAppointment(Pageable pageable){
+        return assembler.toModel(appointmentReopsitory.findAll(pageable), mapper);
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasRole('DOCTOR')")
+    public PagedModel<AppointmentResponseDTO> getListAppointmentPendingOfDoctor(Pageable pageable, Long doctor_id){
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_DOCTOR"))){
+            String currentPrincipalName = authentication.getName();
+            System.out.println("name"+currentPrincipalName);
+            Doctor doctor1= ((User)userService.loadUserByUsername(currentPrincipalName)).getDoctor();
+            if(doctor1.getId() != doctor_id){
+                throw new AccessDeniedException("Access is denied");
+            }
+        }
+        return assembler.toModel(appointmentReopsitory.findListPendingOfDoctor(pageable,doctor_id), mapper);
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasRole('DOCTOR')")
+    public PagedModel<AppointmentResponseDTO> getListAppointmentOfDoctor(Pageable pageable, Long doctor_id){
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_DOCTOR"))){
+            String currentPrincipalName = authentication.getName();
+            System.out.println("name"+currentPrincipalName);
+            Doctor doctor1= ((User)userService.loadUserByUsername(currentPrincipalName)).getDoctor();
+            if(doctor1.getId() != doctor_id){
+                throw new AccessDeniedException("Access is denied");
+            }
+        }
+        return assembler.toModel(appointmentReopsitory.findByDoctor_idOrderByIdDesc(doctor_id,pageable), mapper);
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasRole('PATIENT')")
+    public PagedModel<AppointmentResponseDTO> getListAppointmentOfPatient(Pageable pageable, Long payient_id){
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_PATIENT"))){
+            String currentPrincipalName = authentication.getName();
+            System.out.println("name"+currentPrincipalName);
+            Patient patient= ((User)userService.loadUserByUsername(currentPrincipalName)).getPatient();
+            if(patient.getId() != payient_id){
+                throw new AccessDeniedException("Access is denied");
+            }
+        }
+
+        return assembler.toModel(appointmentReopsitory.findByPatient_idOrderByIdDesc(payient_id,pageable), mapper);
     }
 }

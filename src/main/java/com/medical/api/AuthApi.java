@@ -72,6 +72,8 @@ public class AuthApi {
             tokens.put("access_token",access_token);
             tokens.put("refresh_token",refresh_token);
             tokens.put("image",user.getImage());
+            tokens.put("firstname",user.getFirstName());
+            tokens.put("lastname",user.getLastName());
             if(user.getRole().getName().equals("ROLE_DOCTOR")){
                 tokens.put("id",user.getDoctor().getId()+"");
             } else if(user.getRole().getName().equals("ROLE_PATIENT")){
