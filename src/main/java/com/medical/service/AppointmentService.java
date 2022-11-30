@@ -139,4 +139,12 @@ public class AppointmentService {
 
         return assembler.toModel(appointmentReopsitory.findByPatient_idOrderByIdDesc(payient_id,pageable), mapper);
     }
+
+    public AppointmentResponseDTO getAppointmentById(Long id){
+        Optional<Appointment> appointment = appointmentReopsitory.findById(id);
+        if(appointment.isEmpty()){
+            throw new NoSuchElementException("id appointment không ồn tại");
+        }
+        return mapper.toModel(appointment.get());
+    }
 }

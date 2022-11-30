@@ -4,6 +4,8 @@ import com.medical.configs.CustomGrantedAuthority;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -53,6 +55,13 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user")
     private Patient patient;
 
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(mappedBy = "sender")
+    private List<Message> messageSend;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(mappedBy = "receiver")
+    private List<Message> messageReceive;
 
     public static List<GrantedAuthority> getGrantedAuthorities(Role role){
         List<GrantedAuthority> authorities=new ArrayList<GrantedAuthority>();

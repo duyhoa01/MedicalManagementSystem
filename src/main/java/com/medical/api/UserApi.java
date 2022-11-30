@@ -17,6 +17,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/users")
@@ -71,6 +72,20 @@ public class UserApi {
             return new ResponseEntity<>(new MessageResponse("update fail"),HttpStatus.BAD_REQUEST);
         } else {
             return new ResponseEntity<>(new MessageResponse("change password success"), HttpStatus.OK);
+        }
+    }
+
+    @GetMapping("/{id}/contact")
+    public ResponseEntity<?> getListUserChat(@PathVariable Long id){
+        return new ResponseEntity<>(userService.getListUserChat(id),HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/name")
+    public ResponseEntity<?> getNameById(@PathVariable Long id){
+        try{
+            return new ResponseEntity<>(new MessageResponse(userService.getNameById(id)),HttpStatus.OK);
+        } catch (NoSuchElementException e){
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.BAD_REQUEST);
         }
     }
 }

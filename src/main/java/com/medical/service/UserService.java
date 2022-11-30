@@ -1,7 +1,11 @@
 package com.medical.service;
 
+import com.medical.dtos.UserResponeDTO;
+import com.medical.model.Message;
 import com.medical.model.User;
+import com.medical.repository.MessageRepository;
 import com.medical.repository.UserRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,8 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.SendFailedException;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -30,6 +33,12 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private MessageRepository messageRepository;
+
+    @Autowired
+    private ModelMapper mapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -237,5 +246,29 @@ public class UserService implements UserDetailsService {
                 "  </tbody></table><div class=\"yj6qo\"></div><div class=\"adL\">\n" +
                 "\n" +
                 "</div></div>";
+    }
+
+    public Set<UserResponeDTO> getListUserChat(Long id){
+        List<Message> messages = messageRepository.findListUserChat(id);
+        Set<UserResponeDTO> users  = new HashSet<>();
+        for (Message m:
+             messages) {
+            if(m.getSender().getId() == id){
+                System.out.println("sender"+ m.getId());
+                users.add(mapper.map(m.getReceiver(),UserResponeDTO.class));
+            } if(m.getReceiver().getId() == id ){
+                System.out.println("receiver"+ m.getId());
+                users.add(mapper.map(m.getSender(),UserResponeDTO.class));
+            }
+        }
+        return users;
+    }
+
+    public String getNameById(Long id){
+        Optional<User> user = userRepository.findById(id);
+        if(user.isEmpty()){
+            throw new NoSuchElementException("id user không tồn tại");
+        }
+        return user.get().getFirstName()+" "+user.get().getLastName();
     }
 }

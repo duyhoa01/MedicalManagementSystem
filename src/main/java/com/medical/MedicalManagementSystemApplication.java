@@ -3,6 +3,7 @@ package com.medical;
 import com.cloudinary.Cloudinary;
 import com.medical.mapper.AppointmentMapper;
 import com.medical.mapper.DoctorMapper;
+import com.medical.mapper.MessageMapper;
 import com.medical.mapper.PatientMapper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -74,6 +75,11 @@ public class MedicalManagementSystemApplication {
     @Bean
     public AppointmentMapper appointmentMapper(){
         return new AppointmentMapper();
+    }
+
+    @Bean
+    public MessageMapper messageMapper(){
+        return new MessageMapper();
     }
 
 }

@@ -60,4 +60,13 @@ public class AppointmentApi {
         }
     }
 
+    @GetMapping("{id}")
+    public ResponseEntity<?> getAppointmentById(@PathVariable Long id){
+        try{
+            return new ResponseEntity<>(appointmentService.getAppointmentById(id),HttpStatus.OK);
+        } catch (NoSuchElementException e){
+            return new ResponseEntity<>(new MessageResponse(e.getMessage()),HttpStatus.NOT_FOUND);
+        }
+    }
+
 }
